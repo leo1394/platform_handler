@@ -6,14 +6,16 @@ import 'package:flutter/services.dart';
 import 'package:platform_handler/platform_handler.dart';
 import 'package:platform_handler/platform_notification.dart';
 
-const MethodChannel _methodChannel = MethodChannel('native.clobotics.com/dualMessageChannel');
+const MethodChannel _methodChannel =
+    MethodChannel('native.demo.com/messageChannel');
 
 void main() {
-  final GlobalFactory<MPlatformHandler> handler = GlobalFactory(() => MPlatformHandler());
+  final GlobalFactory<MPlatformHandler> handler =
+      GlobalFactory(() => MPlatformHandler());
   _methodChannel.setMethodCallHandler(handler.getInstance().n2fCallDispatcher);
 
   FusedLocationCallback fusedLocationCallback = FusedLocationCallback();
-  List<PlatformNotification> listeners = [ fusedLocationCallback ];
+  List<PlatformNotification> listeners = [fusedLocationCallback];
 
   handler.getInstance().subscribe(listeners);
 
@@ -44,14 +46,16 @@ class FusedLocationCallback extends PlatformNotification {
 
   FusedLocationCallback() {
     subscribers = {
-      "fineLocationCallback": fusedLocationResultCallback, // fine location update
-      "coarseLocationCallback": fusedLocationResultCallback, // coarse location update
+      "fineLocationCallback":
+          fusedLocationResultCallback, // fine location update
+      "coarseLocationCallback":
+          fusedLocationResultCallback, // coarse location update
     };
   }
 
   @override
   void dockingOn({Completer? completer}) {
-    if(completer != null && !completer.isCompleted) {
+    if (completer != null && !completer.isCompleted) {
       _completers.add(completer);
     }
     _completers = _completers.where((element) => !element.isCompleted).toList();
@@ -60,10 +64,10 @@ class FusedLocationCallback extends PlatformNotification {
 
   void fusedLocationResultCallback(dynamic callbackJson) {
     Map<String, dynamic>? result = json.decode(callbackJson);
-    if(result == null || result["code"] != 0) {
+    if (result == null || result["code"] != 0) {
       _completers.map((e) => e.complete(2));
       _completers = [];
-      return ;
+      return;
     }
 
     var longitude = result["longitude"];

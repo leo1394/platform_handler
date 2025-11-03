@@ -65,9 +65,10 @@ class FusedLocationCallback extends PlatformNotification {
 
 - Create an instance of the platform handler and set the method call handler.
 ```dart
-import 'package:enhanced_change_notifier/enhanced_change_notifier.dart';
+  import 'package:enhanced_change_notifier/enhanced_change_notifier.dart';
 
-final GlobalFactory<MPlatformHandler> handler =
+  const MethodChannel _methodChannel = MethodChannel('native.demo.com/messageChannel');
+  final GlobalFactory<MPlatformHandler> handler =
     GlobalFactory(() => MPlatformHandler());
   _methodChannel.setMethodCallHandler(handler.getInstance().n2fCallDispatcher);
 

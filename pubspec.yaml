@@ -3,7 +3,7 @@ description: A handler plugin package that provides a cross-platform solution fo
 homepage: https://github.com/leo1394/platform_handler
 repository: https://github.com/leo1394/platform_handler
 issue_tracker: https://github.com/leo1394/platform_handler/issues
-version: 1.0.1
+version: 1.0.2
 
 environment:
   sdk: ^3.6.1

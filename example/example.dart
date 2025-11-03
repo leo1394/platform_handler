@@ -10,8 +10,7 @@ const MethodChannel _methodChannel =
     MethodChannel('native.demo.com/messageChannel');
 
 void main() {
-  final GlobalFactory<MPlatformHandler> handler =
-      GlobalFactory(() => MPlatformHandler());
+  final GlobalFactory<Handler> handler = GlobalFactory(() => Handler());
   _methodChannel.setMethodCallHandler(handler.getInstance().n2fCallDispatcher);
 
   FusedLocationCallback fusedLocationCallback = FusedLocationCallback();
@@ -23,7 +22,7 @@ void main() {
   _methodChannel.invokeMethod("locationUpdate");
 }
 
-class MPlatformHandler extends PlatformHandler {
+class Handler extends PlatformHandler {
   @override
   Future<dynamic> n2fCallDispatcher(MethodCall call) async {
     print("call.method: ${call.method}, call.arguments: ${call.arguments}");

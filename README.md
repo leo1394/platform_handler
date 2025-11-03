@@ -12,7 +12,7 @@ A handler plugin package that provides a cross-platform solution for handling pl
 
 - Create a custom class for the platform handler.
 ```dart
-class MPlatformHandler extends PlatformHandler {
+class Handler extends PlatformHandler {
   @override
   Future<dynamic> n2fCallDispatcher(MethodCall call) async {
     print("call.method: ${call.method}, call.arguments: ${call.arguments}");
@@ -68,8 +68,8 @@ class FusedLocationCallback extends PlatformNotification {
   import 'package:enhanced_change_notifier/enhanced_change_notifier.dart';
 
   const MethodChannel _methodChannel = MethodChannel('native.demo.com/messageChannel');
-  final GlobalFactory<MPlatformHandler> handler =
-    GlobalFactory(() => MPlatformHandler());
+  final GlobalFactory<Handler> handler =
+    GlobalFactory(() => Handler());
   _methodChannel.setMethodCallHandler(handler.getInstance().n2fCallDispatcher);
 
   FusedLocationCallback fusedLocationCallback = FusedLocationCallback();

@@ -3,6 +3,9 @@ import 'package:enhanced_change_notifier/enhanced_change_notifier.dart';
 import 'platform_notification.dart';
 import 'platform_notification_manager.dart';
 
+/// A class for the platform handler.
+///
+/// This class is used to create a class for the platform handler.
 class PlatformHandler extends EnhancedChangeNotifier
     implements PlatformNotificationManager {
   @override

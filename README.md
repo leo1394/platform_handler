@@ -57,7 +57,7 @@ class FusedLocationCallback extends PlatformNotification {
   void fusedLocationResultCallback(dynamic callbackJson) {
     Map<String, dynamic>? result = json.decode(callbackJson);
     print("The fused location updated: $result");
-    _completers.map((e) => e.complete(0));
+    _completers.map((e) => e.complete(0)).toList();
     _completers = [];
   }
 }

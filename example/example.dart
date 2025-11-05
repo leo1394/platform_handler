@@ -64,8 +64,8 @@ class FusedLocationCallback extends PlatformNotification {
   void fusedLocationResultCallback(dynamic callbackJson) {
     Map<String, dynamic>? result = json.decode(callbackJson);
     if (result == null || result["code"] != 0) {
-      _completers.map((e) => e.complete(2));
-      _completers = [];
+      _completers.forEach((e) => e.complete(2));
+      _completers.clear();
       return;
     }
 
@@ -73,7 +73,7 @@ class FusedLocationCallback extends PlatformNotification {
     var latitude = result["latitude"];
     lastUpdatedTimestamp = DateTime.now().millisecondsSinceEpoch;
     print("longitude: $longitude, latitude: $latitude");
-    _completers.map((e) => e.complete(0));
-    _completers = [];
+    _completers.forEach((e) => e.complete(0));
+    _completers.clear();
   }
 }

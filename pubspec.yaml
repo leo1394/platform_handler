@@ -3,7 +3,7 @@ description: Organize Flutter MethodChannel calls, native callbacks, and request
 homepage: https://github.com/leo1394/platform_handler
 repository: https://github.com/leo1394/platform_handler
 issue_tracker: https://github.com/leo1394/platform_handler/issues
-version: 1.1.0
+version: 1.1.1
 
 environment:
   sdk: ^3.6.1
@@ -12,7 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  enhanced_change_notifier: ^0.2.0
+  enhanced_change_notifier: ^1.0.1
   extension_dart: ^1.0.10
 
 dev_dependencies:

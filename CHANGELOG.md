@@ -1,3 +1,7 @@
+## 1.1.1
+- update dependencis
+- README.md tiny tuned
+
 ## 1.1.0
 - Add channel registration and native method invocation to `PlatformHandler`.
 - Add `PingPongPlatformNotification` for request id based one-response handling.

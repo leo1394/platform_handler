@@ -34,7 +34,6 @@ class PlatformHandler extends EnhancedChangeNotifier
   Future<dynamic> n2fCallDispatcher(MethodCall call) async {
     if (hasListeners) {
       super.properties[call.method] = call.arguments;
-      notifyListeners(call.method);
     }
     return "SUCCESS";
   }
@@ -65,6 +64,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     );
   }
 
+  /// Builds platform arguments for a native method call.
   dynamic _platformArguments(
       dynamic arguments, PlatformNotification? notification) {
     if (notification is PingPongPlatformNotification) {
@@ -73,6 +73,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     return arguments;
   }
 
+  /// The registered method channel.
   MethodChannel get _channel {
     final channel = _methodChannel;
     if (channel == null) {

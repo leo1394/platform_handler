@@ -5,20 +5,20 @@
 [![GitHub Issues](https://img.shields.io/github/issues/leo1394/platform_handler.svg?branch=master)](https://github.com/leo1394/platform_handler/issues)
 [![GitHub License](https://img.shields.io/badge/license-MIT%20-blue.svg)](https://raw.githubusercontent.com/leo1394/platform_handler/master/LICENSE)
 
-A small Flutter helper for organizing native `MethodChannel` callbacks.
+一个用于整理 Flutter `MethodChannel` 通信的小工具。
 
-`platform_handler` lets you register one native channel, subscribe callback handlers by method name, and invoke native methods through the same manager. For request-response style calls, `PingPongPlatformNotification` automatically attaches a `requestId` and ignores stale or duplicated responses.
+`platform_handler` 可以让你只注册一次 native channel，然后按 method name 把 Native 回调分发给对应的 notification。对于请求-响应型调用，`PingPongPlatformNotification` 会自动添加 `requestId`，并忽略过期、重复或不匹配的响应。
 
-Chinese documentation: [README-zh.md](README-zh.md)
+## 特性
 
-## Features
+- 集中注册 native `MethodChannel`。
+- 按 method name 将 Native 回调路由到独立的 `PlatformNotification`。
+- 业务代码通过 manager 调用 Native，不需要直接持有 `MethodChannel`。
+- 内置 ping-pong request id 机制，适合一次请求只接受一次终态响应的场景。
+  
+语言: 中文 | [English](README-EN.md)
 
-- Register a native `MethodChannel` in one place.
-- Route native callbacks to focused `PlatformNotification` classes.
-- Invoke native methods without exposing `MethodChannel` to business code.
-- Built-in ping-pong request id handling for one request and one terminal response.
-
-## Quick Start
+## 快速开始
 
 ```dart
 final handler = AppPlatformHandler();
@@ -30,7 +30,7 @@ handler.subscribe([
 ]);
 ```
 
-### Handle Native Callbacks
+### 处理 Native 回调
 
 ```dart
 class AppPlatformHandler extends PlatformHandler {
@@ -58,16 +58,16 @@ class LogNotification extends PlatformNotification {
 }
 ```
 
-### Invoke Native Methods
+### 调用 Native 方法
 
 ```dart
 logNotification.listen();
 await handler.invokeMethod('startLog');
 ```
 
-## Ping-Pong Requests
+## Ping-Pong 请求
 
-Use `PingPongPlatformNotification` when each request should accept only one terminal response.
+当每次请求只应该接受一次终态响应时，使用 `PingPongPlatformNotification`。
 
 ```dart
 class RuleNotification extends PingPongPlatformNotification {
@@ -96,7 +96,7 @@ await handler.invokeMethod(
 );
 ```
 
-When the notification is ping-pong, `invokeMethod` sends this shape to native:
+当 notification 是 ping-pong 类型时，`invokeMethod` 会自动把请求参数包装成：
 
 ```dart
 {
@@ -105,7 +105,7 @@ When the notification is ping-pong, `invokeMethod` sends this shape to native:
 }
 ```
 
-Native should return:
+Native 侧应按下面结构返回：
 
 ```dart
 {
@@ -114,18 +114,26 @@ Native should return:
 }
 ```
 
-Only the matching response is delivered to `onRuleResult`. Late, duplicated, or mismatched responses are ignored.
+只有 requestId 匹配的响应会进入 `onRuleResult`。超时后才返回、重复返回、或 requestId 不匹配的响应都会被忽略。
 
-## Native Side
+## Native 侧
 
-Use the same method channel name on Android and iOS:
+Android 和 iOS 使用同一个 channel name：
 
 ```text
 native.demo.com/messageChannel
 ```
 
-Then call Flutter with the method names subscribed by your notifications, for example `LogCallback` or `RuleResult`.
+然后按 notification 订阅的方法名回调 Flutter，例如 `LogCallback` 或 `RuleResult`。
 
-## Additional Information
+## 适用场景
 
-Issues and suggestions are welcome on GitHub.
+- 日志回调
+- 定位回调
+- 扫码回调
+- Lua/规则执行
+- 其他 Native bridge 请求-响应场景
+
+## 更多信息
+
+欢迎在 GitHub 提交 issue 或建议。

@@ -4,15 +4,22 @@ import 'platform_notification.dart';
 
 /// A platform notification for one request and one terminal response.
 class PingPongPlatformNotification extends PlatformNotification {
+  /// The payload key used to store the generated request id.
   static const String requestIdKey = 'requestId';
+
+  /// The payload key used to store the original request arguments.
   static const String requestArgumentsKey = 'arguments';
+
+  /// The payload key used to store response data in native callbacks.
   static const String responseDataKey = 'responseData';
 
+  /// The maximum number of completed request ids retained for duplicate checks.
   final int maxCompletedRequestIds;
   final Set<String> _completedRequestIds = <String>{};
   final List<String> _completedRequestIdOrder = <String>[];
   String? _activeRequestId;
 
+  /// Creates a notification that matches one active request to one response.
   PingPongPlatformNotification({this.maxCompletedRequestIds = 128});
 
   /// Creates a new request id and wraps the platform arguments with it.
@@ -28,20 +35,25 @@ class PingPongPlatformNotification extends PlatformNotification {
     };
   }
 
+  /// The request id currently waiting for a terminal response.
   String? get activeRequestId => _activeRequestId;
 
+  /// Whether a callback method should complete the active request.
   bool isTerminalResponse(String method) => true;
 
+  /// Whether [requestId] matches the active request and has not completed.
   bool isActiveRequestId(String? requestId) {
     return requestId != null &&
         requestId == _activeRequestId &&
         !_completedRequestIds.contains(requestId);
   }
 
+  /// Marks the current active request as completed.
   void completeActiveRequest() {
     completeRequest(_activeRequestId);
   }
 
+  /// Marks [requestId] as completed and clears it if it is active.
   void completeRequest(String? requestId) {
     if (requestId == null || requestId.isEmpty) {
       return;
@@ -57,6 +69,7 @@ class PingPongPlatformNotification extends PlatformNotification {
     }
   }
 
+  /// Extracts a request id from map or JSON string callback arguments.
   static String? requestIdFrom(dynamic arguments) {
     if (arguments is Map) {
       final requestId = arguments[requestIdKey];
@@ -72,6 +85,7 @@ class PingPongPlatformNotification extends PlatformNotification {
     return null;
   }
 
+  /// Extracts response data from callback arguments.
   static dynamic responseDataFrom(dynamic arguments) {
     if (arguments is Map && arguments.containsKey(responseDataKey)) {
       return arguments[responseDataKey];
@@ -79,10 +93,16 @@ class PingPongPlatformNotification extends PlatformNotification {
     return arguments;
   }
 
+  /// Called when a callback is ignored because it does not match the active request.
   void onRequestIgnored(String method, dynamic arguments) {}
+
+  /// Called after a request id is created for outgoing platform arguments.
   void onRequest(String? requestId, dynamic arguments) {}
+
+  /// Called before subscriber callbacks receive a matching response.
   void onResponse(String? requestId, dynamic arguments) {}
 
+  /// Receives a native callback and dispatches it when it matches the active request.
   @override
   dynamic receiver(String method, dynamic arguments) {
     if (!docking || subscribers.isEmpty || !subscribers.containsKey(method)) {

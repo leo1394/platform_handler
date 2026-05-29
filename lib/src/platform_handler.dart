@@ -11,6 +11,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     implements PlatformNotificationManager {
   MethodChannel? _methodChannel;
 
+  /// Registers the method channel used for Flutter-native calls.
   @override
   void registerChannel(
     String channelName, {
@@ -20,6 +21,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     _methodChannel!.setMethodCallHandler(handler ?? n2fCallDispatcher);
   }
 
+  /// Subscribes platform notifications to their registered methods.
   @override
   void subscribe(List<PlatformNotification> notifications) {
     for (var element in notifications) {
@@ -27,6 +29,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     }
   }
 
+  /// Dispatches native-to-Flutter callbacks to matching subscribers.
   @override
   Future<dynamic> n2fCallDispatcher(MethodCall call) async {
     if (hasListeners) {
@@ -36,6 +39,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     return "SUCCESS";
   }
 
+  /// Invokes a native platform method with optional notification wrapping.
   @override
   Future<T?> invokeMethod<T>(
     String method, [
@@ -48,6 +52,7 @@ class PlatformHandler extends EnhancedChangeNotifier
     );
   }
 
+  /// Invokes a native platform method that returns a list.
   @override
   Future<List<T>?> invokeListMethod<T>(
     String method, [
@@ -61,9 +66,7 @@ class PlatformHandler extends EnhancedChangeNotifier
   }
 
   dynamic _platformArguments(
-    dynamic arguments,
-    PlatformNotification? notification
-  ) {
+      dynamic arguments, PlatformNotification? notification) {
     if (notification is PingPongPlatformNotification) {
       return notification.requestArguments(arguments);
     }

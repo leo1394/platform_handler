@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:enhanced_change_notifier/enhanced_change_notifier.dart';
+import 'ping_pong_platform_notification.dart';
 import 'platform_notification.dart';
 import 'platform_notification_manager.dart';
 
@@ -8,6 +9,17 @@ import 'platform_notification_manager.dart';
 /// This class is used to create a class for the platform handler.
 class PlatformHandler extends EnhancedChangeNotifier
     implements PlatformNotificationManager {
+  MethodChannel? _methodChannel;
+
+  @override
+  void registerChannel(
+    String channelName, {
+    Future<dynamic> Function(MethodCall call)? handler,
+  }) {
+    _methodChannel = MethodChannel(channelName);
+    _methodChannel!.setMethodCallHandler(handler ?? n2fCallDispatcher);
+  }
+
   @override
   void subscribe(List<PlatformNotification> notifications) {
     for (var element in notifications) {
@@ -22,5 +34,47 @@ class PlatformHandler extends EnhancedChangeNotifier
       notifyListeners(call.method);
     }
     return "SUCCESS";
+  }
+
+  @override
+  Future<T?> invokeMethod<T>(
+    String method, [
+    dynamic arguments,
+    PlatformNotification? notification,
+  ]) {
+    return _channel.invokeMethod<T>(
+      method,
+      _platformArguments(arguments, notification),
+    );
+  }
+
+  @override
+  Future<List<T>?> invokeListMethod<T>(
+    String method, [
+    dynamic arguments,
+    PlatformNotification? notification,
+  ]) {
+    return _channel.invokeListMethod<T>(
+      method,
+      _platformArguments(arguments, notification),
+    );
+  }
+
+  dynamic _platformArguments(
+    dynamic arguments,
+    PlatformNotification? notification
+  ) {
+    if (notification is PingPongPlatformNotification) {
+      return notification.requestArguments(arguments);
+    }
+    return arguments;
+  }
+
+  MethodChannel get _channel {
+    final channel = _methodChannel;
+    if (channel == null) {
+      throw StateError("Platform channel has not been registered.");
+    }
+    return channel;
   }
 }

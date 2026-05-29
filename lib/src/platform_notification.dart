@@ -24,9 +24,10 @@ class PlatformNotification {
   /// This method is used to receive the notification.
   dynamic receiver(String method, dynamic arguments) {
     if (!docking || subscribers.isEmpty || !subscribers.containsKey(method)) {
-      return;
+      return false;
     }
     Function.apply(subscribers[method]!, [arguments]);
+    return true;
   }
 
   /// A method for getting the subscriptions of the notification.

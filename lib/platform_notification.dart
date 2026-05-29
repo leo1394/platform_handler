@@ -4,3 +4,4 @@
 library;
 
 export 'src/platform_notification.dart';
+export 'src/ping_pong_platform_notification.dart';

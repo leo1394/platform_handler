@@ -1,79 +1,62 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:enhanced_change_notifier/enhanced_change_notifier.dart';
 import 'package:flutter/services.dart';
 import 'package:platform_handler/platform_handler.dart';
 import 'package:platform_handler/platform_notification.dart';
 
-const MethodChannel _methodChannel =
-    MethodChannel('native.demo.com/messageChannel');
+Future<void> main() async {
+  final handler = AppPlatformHandler();
+  final logNotification = LogNotification()..listen();
+  final ruleNotification = RuleNotification(
+    onResult: (result) => print('rule result: $result'),
+  )..listen();
 
-void main() {
-  final GlobalFactory<Handler> handler = GlobalFactory(() => Handler());
-  _methodChannel.setMethodCallHandler(handler.getInstance().n2fCallDispatcher);
+  handler.registerChannel('native.demo.com/messageChannel');
+  handler.subscribe([
+    logNotification,
+    ruleNotification,
+  ]);
 
-  FusedLocationCallback fusedLocationCallback = FusedLocationCallback();
-  List<PlatformNotification> listeners = [fusedLocationCallback];
-
-  handler.getInstance().subscribe(listeners);
-
-  fusedLocationCallback.dockingOn();
-  _methodChannel.invokeMethod("locationUpdate");
+  await handler.invokeMethod('startLog');
+  await handler.invokeMethod('luaScript', 'return 1', ruleNotification);
 }
 
-class Handler extends PlatformHandler {
+class AppPlatformHandler extends PlatformHandler {
   @override
   Future<dynamic> n2fCallDispatcher(MethodCall call) async {
-    print("call.method: ${call.method}, call.arguments: ${call.arguments}");
-    switch (call.method) {
-      case "LogCallback": //日志回调
-        String tag = call.arguments["tag"];
-        String message = call.arguments["message"];
-        print("$tag: $message");
-        break;
-    }
-
+    print('native -> flutter: ${call.method}, ${call.arguments}');
     return super.n2fCallDispatcher(call);
   }
 }
 
-class FusedLocationCallback extends PlatformNotification {
-  int lastUpdatedTimestamp = 0;
-  List<Completer> _completers = [];
-  Timer? updateLatestLocationTimer;
-
-  FusedLocationCallback() {
+class LogNotification extends PlatformNotification {
+  LogNotification() {
     subscribers = {
-      "fineLocationCallback":
-          fusedLocationResultCallback, // fine location update
-      "coarseLocationCallback":
-          fusedLocationResultCallback, // coarse location update
+      'LogCallback': onLog,
     };
   }
 
-  @override
-  void dockingOn({Completer? completer}) {
-    if (completer != null && !completer.isCompleted) {
-      _completers.add(completer);
-    }
-    _completers = _completers.where((element) => !element.isCompleted).toList();
+  void listen() {
     docking = true;
   }
 
-  void fusedLocationResultCallback(dynamic callbackJson) {
-    Map<String, dynamic>? result = json.decode(callbackJson);
-    if (result == null || result["code"] != 0) {
-      _completers.forEach((e) => e.complete(2));
-      _completers.clear();
-      return;
-    }
+  void onLog(dynamic arguments) {
+    print('log: $arguments');
+  }
+}
 
-    var longitude = result["longitude"];
-    var latitude = result["latitude"];
-    lastUpdatedTimestamp = DateTime.now().millisecondsSinceEpoch;
-    print("longitude: $longitude, latitude: $latitude");
-    _completers.forEach((e) => e.complete(0));
-    _completers.clear();
+class RuleNotification extends PingPongPlatformNotification {
+  final void Function(dynamic result) onResult;
+
+  RuleNotification({required this.onResult}) {
+    subscribers = {
+      'RuleResult': onRuleResult,
+    };
+  }
+
+  void listen() {
+    docking = true;
+  }
+
+  void onRuleResult(dynamic responseData) {
+    onResult(responseData);
   }
 }
